@@ -3,46 +3,88 @@
 `Rack::Request.params` validation and type coercion, on Rack.
 
 ```ruby
-# example uses Nancy, because plain Rack is ugly
-# nothing about Rack::Params requires Nancy or any other framework.
+# NOTE (to self) - if this changes, update `readme_spec.rb`
 
-class MyApp < Nancy::Base
+class SomeExampleApp
   include Rack::Params
 
-  # can create named validators that can be run at any time
+  # create named validators that can be run at any time
   
   validator :document do
     param :id,      Integer,  required: true
     param :title,   String,   required: true
     param :created, DateTime
     
-    param :tags, Array, default: ['a', 'b', 'c'] do
+    param :tags, Array, sep: " " do
       every Symbol
     end
     
     param :content, Hash, required: true do
       param :header, String
-      param :body,   String
+      param :body,   String, required: true
     end
   end
   
-  post "/doc/" do
-    validate :document
+  # run pre-defined or ad-hoc transforms on some hash
+  # only keys in the validator blocks are copied, see #splat
+
+  def call(env)
+    request = Rack::Request.new(env)
     
-    # params is now converted
-    
-    assert params[:id]   == 38
-    assert params[:tags] ==
-  end
-  
-  put "/:id/star" do |id|
-    validate do
-      params :id,      Integer
-      params :starred, :boolean
+    params = request.params
+    params = validate(request.params, :document)
+    if params.valid?
+      assert params["id"].is_a? Integer
+      assert (not params["content"]["body"].nil?)
+    else
+      assert params.errors.length > 0
+      assert params.invalid?
+    end
+
+    # or
+    params = { "flag" => "f", "some" => "other key", "and" => "one more" }
+    params = validate(params) do
+      param :flag,  :boolean, required: true
+      splat :rest
     end
     
-    fail "bad parameters!" if params.invalid?
-    params.errors[:id] = ['something went wrong']
+    if params.valid?
+      assert [true, false].include?(params["flag"])
+      assert (["some", "and"] - params["rest"]).empty?
+    end
+
+  end
+end
+
+# if you're using a framework which provides `request` as a getter method
+# include the connector, which provides a `#params` override, and allows
+# defaulting to request.params in validate calls
+
+class FancyApp < Nancy::Base
+  include Rack::Params::Connect
+
+  validator :check do
+    :id, Integer
+  end
+  
+  get "/" do
+    validate :check
+
+    if params.valid?
+      assert params["id"].is_a? Integer
+    else
+      assert params.errors.length > 0
+      assert params.invalid?
+    end
+    
+    "magic 8-ball, how's my params? << uncertan. >>"
+  end
+
+  get "/blow-up-on-failure" do
+    validate! :check
+    assert params.valid?
+
+    "if I'm going down, I'm taking you all with me."
   end
 end
 ```
