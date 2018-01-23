@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["jon@accidental.cc"]
 
   spec.summary       = %q{Rack parameter validation and type coercion.}
-  spec.homepage      = "https://accidental.cc"
+  spec.homepage      = "https://github.com/lygaret/rack-params"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0").reject do |f|
