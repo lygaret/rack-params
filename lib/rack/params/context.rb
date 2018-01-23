@@ -63,19 +63,7 @@ module Rack
 
       def _validate(name, value, validation, options)
         options = {} if options == true
-
-        if validation == :oneOf
-          raise InvalidParameterError, "must be one of #{options}" unless options.include? value
-
-        elsif validation == :uri
-          uri     = URI.parse(value)
-          schemes = options.fetch(:schemes, %w(http https))
-          local   = options.fetch(:local, false)
-
-          unless uri && uri.host && schemes.include?(uri.scheme) && (local || uri.host.include?('.'))
-            raise InvalidParameterError, "must be a #{schemes.join(',')} URI"
-          end
-        end
+        # what to do...
       end
 
       def _recurse(name, type, value, &block)

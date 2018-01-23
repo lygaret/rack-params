@@ -1,11 +1,24 @@
 require "bundler/setup"
 
+require "byebug"
+require "simplecov"
+require "simplecov-console"
+require "coveralls"
+
+SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
+  [
+    SimpleCov::Formatter::Console,
+    SimpleCov::Formatter::HTMLFormatter,
+    Coveralls::SimpleCov::Formatter
+  ]
+)
+SimpleCov.start
+
 # drop the lib directory into the load path
 lib = File.expand_path("../../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 require "rack/params"
-require "byebug"
 
 RSpec.configure do |config|
   config.expect_with :rspec do |expectations|

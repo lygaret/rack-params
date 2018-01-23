@@ -133,7 +133,72 @@ RSpec.describe Rack::Params do
     end
   end
 
-  context "nested hash validation" do
+  context "boolean" do
+    it "can coerce true from a bunch of different strings" do
+      results = target.validate!({
+        "trues" => %w(1 t true y yes),
+        "falses" => %w(0 f false n no)
+      }) do
+        param("trues", Array) { every :boolean }
+        param("falses", Array) { every :boolean }
+      end
+
+      expect(results).to be_valid
+      expect(results["trues"]).to contain_exactly(true, true, true, true, true)
+      expect(results["falses"]).to contain_exactly(false, false, false, false, false)
+    end
+
+    it "fails rather than returns false" do
+      results = target.validate({ "bool" => "uh-uh" }) do
+        param "bool", :boolean
+      end
+
+      expect(results).to be_invalid
+    end
+  end
+
+  context "array and hash coercion" do
+    it "can split up a string into an array by a separator" do
+      results = target.validate!({ "ar1" => "a b c d e", "ar2" => "a|b|c" }) do
+        param("ar1", Array, sep: " ") { every Symbol }
+        param("ar2", Array, sep: "|") { every Symbol }
+      end
+
+      expect(results["ar1"]).to contain_exactly(:a, :b, :c, :d, :e)
+      expect(results["ar2"]).to contain_exactly(:a, :b, :c)
+    end
+
+    it "can split up a string into a hash by field and row separators" do
+      results = target.validate!({ "hs1" => "a=b;c=d;e=f" }) do
+        param("hs1", Hash, esep: ";", fsep: "=")
+      end
+
+      expect(results["hs1"]).to match("a" => "b", "c" => "d", "e" => "f")
+    end
+
+    it "can invalidate arrays" do
+      results = target.validate({ "ar1" => "0 2 4 f 8" }) do
+        param("ar1", Array, sep: " ") { every Integer }
+      end
+
+      expect(results).to be_invalid
+      expect(results.errors.keys).to contain_exactly("ar1.3")
+    end
+
+    it "can validate nested arrays" do
+      results = target.validate({ "ar1" => "0,1,2;3,4,5;6,t,8" }) do
+        param("ar1", Array, sep: ";") {
+          every Array, sep: "," do
+            every Integer
+          end
+        }
+      end
+
+      expect(results).to be_invalid
+      expect(results.errors.keys).to contain_exactly("ar1.2.1")
+      expect(results["ar1"]).to contain_exactly([0, 1, 2], [3, 4, 5], [6, nil, 8])
+    end
+
     it "can validate nested hashes" do
       params = {
         "hash" => {

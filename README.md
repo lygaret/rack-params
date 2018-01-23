@@ -1,5 +1,5 @@
 # Rack::Params
-[![Gem Version](https://badge.fury.io/rb/rack-params.svg)](https://badge.fury.io/rb/rack-params) [![Build Status](https://travis-ci.org/lygaret/rack-params.svg?branch=master)](https://travis-ci.org/lygaret/rack-params) 
+[![Gem Version](https://badge.fury.io/rb/rack-params.svg)](https://badge.fury.io/rb/rack-params) [![Build Status](https://travis-ci.org/lygaret/rack-params.svg?branch=master)](https://travis-ci.org/lygaret/rack-params) [![Coverage Status](https://coveralls.io/repos/github/lygaret/rack-params/badge.svg?branch=master)](https://coveralls.io/github/lygaret/rack-params?branch=master)
 
 `Rack::Request.params` validation and type coercion, on Rack.
 
