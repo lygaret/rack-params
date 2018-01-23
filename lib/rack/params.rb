@@ -38,12 +38,12 @@ module Rack
         HashContext.new(params, options).exec(&block)
       else
         fail ArgumentError, "no validation is registered under #{name}" unless self.class.validators.key? name
-        self.class.validators[name].execute(params)
+        self.class.validators[name].exec(params)
       end
     end
 
     def validate!(name = nil, params = nil, options = {}, &block)
-      validate(name, params, options, block).tap do |res|
+      validate(name, params, options, &block).tap do |res|
         fail ParameterValidationError, res.errors if res.invalid?
       end
     end

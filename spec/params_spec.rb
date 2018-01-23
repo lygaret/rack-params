@@ -8,33 +8,35 @@ RSpec.describe Rack::Params do
     expect(Rack::Params::VERSION).not_to be nil
   end
 
-  let (:target) do
-    Class.new do
-      include Rack::Params
-      validator :demo do
-        param :num, Integer
-      end
+  class Target
+    include Rack::Params
+
+    validator :demo do
+      param :num, Integer
     end
+  end
+
+  let (:target) do
+    Target.new
   end
 
   context ".validator" do
     it "can save a named validator, and run it later" do
-      result = target.new.validate(:demo, { "num" => "39" })
+      result = target.validate(:demo, { "num" => "39" })
       expect(result).to be_valid
       expect(result["num"]).to eq(39)
     end
 
     it "gets an error if validating an unknown named validator" do
       expect {
-        target.new.validate(:not_extant, {})
+        target.validate(:not_extant, {})
       }.to raise_error ArgumentError
     end
   end
 
   context "#validate" do
     it "can run validation from the given block" do
-      t = target.new
-      r = t.validate({ "num" => "39" }) do
+      r = target.validate({ "num" => "39" }) do
         param :num, Integer
         param :str, String, default: "some string"
       end
@@ -46,8 +48,7 @@ RSpec.describe Rack::Params do
     end
 
     it "can fail validation if something's wrong" do
-      t = target.new
-      r = t.validate({ "num" => "39" }) do
+      r = target.validate({ "num" => "39" }) do
         param :missing, String, required: true
       end
 
@@ -58,81 +59,77 @@ RSpec.describe Rack::Params do
   context "#validate!" do
 
     it "can do a basic successful validation" do
-      params = { "str" => "is present" }
-      harness.validate! params do
-        param! :str, String, required: true
+      params  = { "str" => "is present", "extra" => "lost" }
+      results = target.validate! params do
+        param :str, String, required: true
+        param :missing, String
+        param :defaulted, String, default: "hi"
       end
       
-      expect(params["str"]).to eq("is present")
-      expect(params.count).to eq(1)
+      expect(results["str"]).to eq("is present")
+      expect(results["missing"]).to be_nil
+      expect(results["defaulted"]).to eq("hi")
+      expect(results.key? "extra").to be(false)
     end
 
     it "can freak out about missing params" do
       expect do
-        harness.validate!({}) do
-          param! "str", String, required: true
+        target.validate!({}) do
+          param "str", String, required: true
         end
-      end.to raise_error { |ex|
-        expect(ex).to be_a Rack::Params::InvalidParameterError
-        expect(ex.name).to eq("str")
-        expect(ex.type).to eq(String)
-        expect(ex.options).to match({ required: true })
-      }
+      end.to raise_error do |ex|
+        expect(ex).to be_a Rack::Params::ParameterValidationError
+      end
     end
 
     it "can provide a default value" do
-      params = {}
-      harness.validate! params do
-        param! "str", String, default: "default value"
+      results = target.validate!({}) do
+        param "str", String, default: "default value"
       end
 
-      expect(params).to match({ "str" => "default value" })
+      expect(results).to match({ "str" => "default value" })
     end
   end
 
   context "number type coercion" do
     it "can convert to integers" do
-      params = { "number" => "42" }
-      harness.validate! params do
-        param! "number", Integer
+      results = target.validate!({ "number" => "42" }) do
+        param "number", Integer
       end
 
-      expect(params).to match({ "number" => 42 })
+      expect(results).to match({ "number" => 42 })
     end
 
     it "can convert to integers in other bases" do
-      params = { "hex" => "0xff" }
-      harness.validate! params do
-        param! "hex", Integer, base: 16
+      results = target.validate!({ "hex" => "0xff" }) do
+        param "hex", Integer, base: 16
       end
 
-      expect(params).to match({ "hex" => 255 })
+      expect(results).to match({ "hex" => 255 })
     end
 
     it "fails if given a bad coercion" do
       expect do
-        harness.validate!({ "number" => "string" }) do
-          param! "number", Integer
+        target.validate!({ "number" => "string" }) do
+          param "number", Integer
         end
-      end.to raise_error Rack::Params::InvalidParameterError
+      end.to raise_error Rack::Params::ParameterValidationError
     end
 
     it "can convert to floats" do
-      params = { "number" => "10.3" }
-      harness.validate! params do
-        param! "number", Float
+      results = target.validate!({ "number" => "10.3" }) do
+        param "number", Float
       end
 
-      expect(params).to match({ "number" => 10.3 })
+      expect(results).to match({ "number" => 10.3 })
     end
 
     it "can convert something int-ish to a float" do
-      params = { "number" => "10" }
-      harness.validate! params do
-        param! "number", Float
+      results = target.validate!({ "number" => "10" }) do
+        param "number", Float
       end
 
-      expect(params).to match({ "number" => 10.0 })
+      expect(results).to match({ "number" => 10.0 })
     end
   end
 
@@ -141,19 +138,21 @@ RSpec.describe Rack::Params do
       params = {
         "hash" => {
           "string" => "blah",
-          "number" => "10"
+          "number" => "10",
+          "extra" => "ignored"
         }
       }
 
-      harness.validate! params do
-        param! "hash", Hash do
-          param! "string", String, required: true
-          param! "number", Integer, required: true
-          param! "option", String, default: "default value"
+      results = target.validate!(params) do
+        param "hash", Hash do
+          param "string", String, required: true
+          param "number", Integer, required: true
+          param "option", String, default: "default value"
         end
       end
 
-      expect(params).to match({ "hash" => { "string" => "blah", "number" => 10, "option" => "default value" } })
+      expect(results).to match({ "hash" => { "string" => "blah", "number" => 10, "option" => "default value" } })
+      expect(results.key? "extra").to be(false)
     end
 
     it "can invalidate nested hashes" do
@@ -165,15 +164,15 @@ RSpec.describe Rack::Params do
       }
 
       expect do
-        harness.validate! params do
-          param! "hash", Hash do
-            param! "string", String, required: true
-            param! "number", Integer, required: true
-            param! "option", String, default: "default value"
+        target.validate!(params) do
+          param "hash", Hash do
+            param "string", String, required: true
+            param "number", Integer, required: true
+            param "option", String, default: "default value"
           end
         end
       end.to raise_error do |ex|
-        expect(ex.name).to eq("number")
+        expect(ex.errors.keys).to include("hash.number")
       end
     end
   end
