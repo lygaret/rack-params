@@ -3,6 +3,7 @@ require 'date'
 module Rack
   module Params
 
+    # the context in which to run validation.
     class Context
       attr_reader :options
       attr_reader :params
@@ -23,6 +24,8 @@ module Rack
         instance_exec(&block)
         @result
       end
+
+      protected
 
       def _coerce(value, type, options)
         return nil   if value.nil?
