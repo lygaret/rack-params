@@ -108,7 +108,7 @@ Or install it yourself as:
 
 ## Usage
 
-**[RDoc @ master - Rack::Params](http://www.rudydoc.info/github/lygaret/master)**
+**[RDoc @ master - Rack::Params](http://www.rubydoc.info/github/lygaret/rack-params/master)**
 
 1. Include `Rack::Params` to get the `.validator`, `#validate` and `#validate!` methods.
 2. Call `.validator(name, options = {}, &code)` to register a named validator for use later.
