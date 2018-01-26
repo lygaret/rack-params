@@ -16,9 +16,5 @@ module Rack
       end
     end
 
-    class InvalidParameterError < StandardError
-      attr_accessor :name, :type, :options
-    end
-
   end
 end
