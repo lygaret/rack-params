@@ -63,6 +63,19 @@
 
 <p><code>Rack::Request.params</code> validation and type coercion, on Rack.</p>
 
+<h2>Usage</h2>
+
+<p><strong><a href="https://lygaret.github.io/rack-params/">Documentation</a></strong></p>
+
+<ol>
+<li>Include <code>Rack::Params</code> to get the <code>.validator</code>, <code>#validate</code> and <code>#validate!</code> methods.</li>
+<li>Call <code>.validator(name, options = {}, &amp;code)</code> to register a named validator for use later.</li>
+<li>Call <code>#validate(name = nil, params = request.params, options = {}, &amp;code)</code> to build a new result, with the results of validation and coercion.</li>
+<li>The blocks passed to the validation methods run in the context of <code>HashContext</code> and <code>ArrayContext</code>, which is where the coercion methods are defined.</li>
+</ol>
+
+<h2>Example</h2>
+
 <pre class="code ruby"><code class="ruby"># NOTE (to self) - if this changes, update `readme_spec.rb`
 
 class SomeExampleApp
@@ -166,17 +179,6 @@ end
 <pre class="code ruby"><code class="ruby">$ gem install rack-params
 </code></pre>
 
-<h2>Usage</h2>
-
-<p><strong><a href="http://www.rubydoc.info/github/lygaret/rack-params/master">RDoc @ master - Rack::Params</a></strong></p>
-
-<ol>
-<li>Include <code>Rack::Params</code> to get the <code>.validator</code>, <code>#validate</code> and <code>#validate!</code> methods.</li>
-<li>Call <code>.validator(name, options = {}, &amp;code)</code> to register a named validator for use later.</li>
-<li>Call <code>#validate(name = nil, params = request.params, options = {}, &amp;code)</code> to build a new result, with the results of validation and coercion.</li>
-<li>The blocks passed to the validation methods run in the context of <code>HashContext</code> and <code>ArrayContext</code>, which is where the coercion methods are defined.</li>
-</ol>
-
 <h2>Development</h2>
 
 <p>After checking out the repo, run <code>bin/setup</code> to install dependencies. Then, run <code>rake spec</code> to run the tests. You can also run <code>bin/console</code> for an interactive prompt that will allow you to experiment.</p>
@@ -200,7 +202,7 @@ end
 </div></div>
 
       <div id="footer">
-  Generated on Fri Jan 26 16:39:57 2018 by
+  Generated on Fri Jan 26 16:40:58 2018 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.12 (ruby-2.4.2).
 </div>
