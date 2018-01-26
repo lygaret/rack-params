@@ -3,6 +3,17 @@
 
 `Rack::Request.params` validation and type coercion, on Rack.
 
+## Usage
+
+**[Documentation](https://lygaret.github.io/rack-params/)**
+
+1. Include `Rack::Params` to get the `.validator`, `#validate` and `#validate!` methods.
+2. Call `.validator(name, options = {}, &code)` to register a named validator for use later.
+3. Call `#validate(name = nil, params = request.params, options = {}, &code)` to build a new result, with the results of validation and coercion.
+4. The blocks passed to the validation methods run in the context of `HashContext` and `ArrayContext`, which is where the coercion methods are defined.
+
+## Example
+
 ```ruby
 # NOTE (to self) - if this changes, update `readme_spec.rb`
 
@@ -105,15 +116,6 @@ And then execute:
 Or install it yourself as:
 
     $ gem install rack-params
-
-## Usage
-
-**[RDoc @ master - Rack::Params](http://www.rubydoc.info/github/lygaret/rack-params/master)**
-
-1. Include `Rack::Params` to get the `.validator`, `#validate` and `#validate!` methods.
-2. Call `.validator(name, options = {}, &code)` to register a named validator for use later.
-3. Call `#validate(name = nil, params = request.params, options = {}, &code)` to build a new result, with the results of validation and coercion.
-4. The blocks passed to the validation methods run in the context of `HashContext` and `ArrayContext`, which is where the coercion methods are defined.
 
 ## Development
 
