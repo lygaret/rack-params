@@ -69,11 +69,6 @@
 
   
   
-  <dl>
-      <dt>Extended by:</dt>
-      <dd><span class='object_link'><a href="Params/ClassMethods.html" title="Rack::Params::ClassMethods (module)">ClassMethods</a></span></dd>
-  </dl>
-  
   
   
   
@@ -110,7 +105,7 @@ request parameters.</p>
     
   
     
-      <strong class="classes">Classes:</strong> <span class='object_link'><a href="Params/ArrayContext.html" title="Rack::Params::ArrayContext (class)">ArrayContext</a></span>, <span class='object_link'><a href="Params/Context.html" title="Rack::Params::Context (class)">Context</a></span>, <span class='object_link'><a href="Params/HashContext.html" title="Rack::Params::HashContext (class)">HashContext</a></span>, <span class='object_link'><a href="Params/InvalidParameterError.html" title="Rack::Params::InvalidParameterError (class)">InvalidParameterError</a></span>, <span class='object_link'><a href="Params/ParameterValidationError.html" title="Rack::Params::ParameterValidationError (class)">ParameterValidationError</a></span>
+      <strong class="classes">Classes:</strong> <span class='object_link'><a href="Params/ArrayContext.html" title="Rack::Params::ArrayContext (class)">ArrayContext</a></span>, <span class='object_link'><a href="Params/Context.html" title="Rack::Params::Context (class)">Context</a></span>, <span class='object_link'><a href="Params/HashContext.html" title="Rack::Params::HashContext (class)">HashContext</a></span>, <span class='object_link'><a href="Params/ParameterValidationError.html" title="Rack::Params::ParameterValidationError (class)">ParameterValidationError</a></span>
     
   
 </p>
@@ -131,44 +126,6 @@ request parameters.</p>
 
 
 
-  
-    <h2>
-      Class Method Summary
-      <small><a href="#" class="summary_toggle">collapse</a></small>
-    </h2>
-
-    <ul class="summary">
-      
-        <li class="public ">
-  <span class="summary_signature">
-    
-      <a href="#validator-class_method" title="#validator (class method)">.<strong>validator</strong>(name, options = {}, &amp;code)  &#x21d2; Object </a>
-    
-
-    
-  </span>
-  
-    <span class="note title not_defined_here">
-      extended
-      from <span class='object_link'><a href="Params/ClassMethods.html#validator-class_method" title="Rack::Params::ClassMethods#validator (method)">ClassMethods</a></span>
-    </span>
-  
-  
-  
-  
-  
-  
-  
-
-  
-    <span class="summary_desc"><div class='inline'>
-<p>register a Validator with the given options and block.</p>
-</div></span>
-  
-</li>
-
-      
-    </ul>
   
     <h2>
       Instance Method Summary
@@ -219,7 +176,7 @@ request parameters.</p>
 
   
     <span class="summary_desc"><div class='inline'>
-<p>validate the given parameters, and raise on error.</p>
+<p></p>
 </div></span>
   
 </li>
@@ -229,43 +186,6 @@ request parameters.</p>
   
 
 
-  
-  
-
-  <div id="class_method_details" class="method_details_list">
-    <h2>Class Method Details</h2>
-
-    
-      <div class="method_details first">
-  <h3 class="signature first" id="validator-class_method">
-  
-    .<strong>validator</strong>(name, options = {}, &amp;code)  &#x21d2; <tt>Object</tt> 
-  
-
-  
-
-  
-    <span class="not_defined_here">
-      Originally defined in module
-        <span class='object_link'><a href="Params/ClassMethods.html#validator-class_method" title="Rack::Params::ClassMethods#validator (method)">ClassMethods</a></span>
-    </span>
-  
-</h3><div class="docstring">
-  <div class="discussion">
-    
-<p>register a Validator with the given options and block. the validator can be
-used in #validate method by providing the name.</p>
-
-
-  </div>
-</div>
-<div class="tags">
-  
-
-</div>
-</div>
-    
-  </div>
 
   <div id="instance_method_details" class="method_details_list">
     <h2>Instance Method Details</h2>
@@ -484,6 +404,7 @@ to validate the params</p>
       <pre class="lines">
 
 
+53
 54
 55
 56
@@ -497,11 +418,10 @@ to validate the params</p>
 64
 65
 66
-67
-68</pre>
+67</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/rack/params.rb', line 54</span>
+      <pre class="code"><span class="info file"># File 'lib/rack/params.rb', line 53</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_validate'>validate</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='id identifier rubyid_params'>params</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='kw'>if</span> <span class='id identifier rubyid_params'>params</span><span class='period'>.</span><span class='id identifier rubyid_nil?'>nil?</span> <span class='op'>&amp;&amp;</span> <span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='period'>.</span><span class='id identifier rubyid_class'>class</span> <span class='op'>&lt;=</span> <span class='const'>Hash</span><span class='rparen'>)</span>
@@ -539,7 +459,7 @@ to validate the params</p>
 </h3><div class="docstring">
   <div class="discussion">
     
-<p>validate the given parameters, and raise on error.</p>
+<p>validate the given parameters</p>
 
 
   </div>
@@ -765,14 +685,14 @@ to validate the params</p>
       <pre class="lines">
 
 
+83
 84
 85
 86
-87
-88</pre>
+87</pre>
     </td>
     <td>
-      <pre class="code"><span class="info file"># File 'lib/rack/params.rb', line 84</span>
+      <pre class="code"><span class="info file"># File 'lib/rack/params.rb', line 83</span>
 
 <span class='kw'>def</span> <span class='id identifier rubyid_validate!'>validate!</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='id identifier rubyid_params'>params</span> <span class='op'>=</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='id identifier rubyid_options'>options</span> <span class='op'>=</span> <span class='lbrace'>{</span><span class='rbrace'>}</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span>
   <span class='id identifier rubyid_validate'>validate</span><span class='lparen'>(</span><span class='id identifier rubyid_name'>name</span><span class='comma'>,</span> <span class='id identifier rubyid_params'>params</span><span class='comma'>,</span> <span class='id identifier rubyid_options'>options</span><span class='comma'>,</span> <span class='op'>&amp;</span><span class='id identifier rubyid_block'>block</span><span class='rparen'>)</span><span class='period'>.</span><span class='id identifier rubyid_tap'>tap</span> <span class='kw'>do</span> <span class='op'>|</span><span class='id identifier rubyid_res'>res</span><span class='op'>|</span>
@@ -789,7 +709,7 @@ to validate the params</p>
 </div>
 
       <div id="footer">
-  Generated on Fri Jan 26 15:31:37 2018 by
+  Generated on Fri Jan 26 15:53:39 2018 by
   <a href="http://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
   0.9.12 (ruby-2.4.2).
 </div>
