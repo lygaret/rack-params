@@ -14,6 +14,10 @@ RSpec.describe Rack::Params do
     validator :demo do
       param :num, Integer
     end
+
+    def target_capitalize(v)
+      v[0].upcase + v[1..-1]
+    end
   end
 
   let (:target) do
@@ -30,7 +34,7 @@ RSpec.describe Rack::Params do
     it "gets an error if validating an unknown named validator" do
       expect {
         target.validate(:not_extant, {})
-      }.to raise_error ArgumentError
+      }.to raise_error RuntimeError, /no validation is registered/
     end
   end
 
@@ -65,7 +69,7 @@ RSpec.describe Rack::Params do
         param :missing, String
         param :defaulted, String, default: "hi"
       end
-      
+
       expect(results["str"]).to eq("is present")
       expect(results["missing"]).to be_nil
       expect(results["defaulted"]).to eq("hi")
@@ -80,6 +84,16 @@ RSpec.describe Rack::Params do
       end.to raise_error do |ex|
         expect(ex).to be_a Rack::Params::ParameterValidationError
       end
+    end
+
+    it "doesn't include the missing param in the output at all" do
+      result = target.validate({}) do
+        param "str", String, required: true
+      end
+
+      expect(result).to be_invalid
+      expect(result.keys.length).to eq(0)
+      expect(result.errors.keys).to contain_exactly("str")
     end
 
     it "can provide a default value" do
@@ -157,28 +171,62 @@ RSpec.describe Rack::Params do
     end
   end
 
+  context "param overloads" do
+    it "can do simple type coercion (with and without) options" do
+      results = target.validate({ "pi-ish" => "3.1415" }) do
+        param "pi-ish",  Float
+        param "missing", String, default: "defaulted"
+      end
+
+      expect(results).to be_valid
+      expect(results["pi-ish"]).to eq(3.1415)
+      expect(results["missing"]).to eq("defaulted")
+    end
+
+    it "fails when simple type coercion gets a block (with or without options)" do
+      expect do
+        target.validate({ "key" => "hello" }) do
+          param("key", String) { v.to_s.upcase }
+        end
+      end.to raise_error RuntimeError, /cannot recurse/
+
+      expect do
+        target.validate({ "key" => "hello" }) do
+          param("key", String, required: true) { v.to_s.upcase }
+        end
+      end.to raise_error RuntimeError, /cannot recurse/
+    end
+
+    it "can do block type coercion (with and without) options" do
+      results = target.validate({ "key" => "helloworld" }) do
+        param("key")                     { |v| v.to_s.upcase }
+        param("missing", required: true) { |v| v.to_s.upcase }
+      end
+
+      expect(results).to be_invalid
+      expect(results["key"]).to eq("HELLOWORLD")
+      expect(results.errors.keys).to include("missing")
+    end
+
+    # since the way this works is a whitelist, we can add special
+    # cases however we want going forward, it won't break anything
+
+    it "can do hash and array coercion (short circuits out of 'simple type coercion')" do
+      results = target.validate({ "string" => "hello", "hash" => { "key" => "value" }, "array" => %w(1 2 3) }) do
+        param("hash", Hash) { param "key", String }
+        param("array", Array) { every Integer }
+        param("string") { |v| "#{v[0].upcase}#{v[1..-1]}, #{v}!" }
+      end
+
+      expect(results).to be_valid
+      expect(results).to match({ "hash" => { "key" => "value" }, "array" => [1, 2, 3], "string" => "Hello, hello!"})
+    end
+  end
+
   context "array and hash coercion" do
-    it "can split up a string into an array by a separator" do
-      results = target.validate!({ "ar1" => "a b c d e", "ar2" => "a|b|c" }) do
-        param("ar1", Array, sep: " ") { every Symbol }
-        param("ar2", Array, sep: "|") { every Symbol }
-      end
-
-      expect(results["ar1"]).to contain_exactly(:a, :b, :c, :d, :e)
-      expect(results["ar2"]).to contain_exactly(:a, :b, :c)
-    end
-
-    it "can split up a string into a hash by field and row separators" do
-      results = target.validate!({ "hs1" => "a=b;c=d;e=f" }) do
-        param("hs1", Hash, esep: ";", fsep: "=")
-      end
-
-      expect(results["hs1"]).to match("a" => "b", "c" => "d", "e" => "f")
-    end
-
     it "can invalidate arrays" do
-      results = target.validate({ "ar1" => "0 2 4 f 8" }) do
-        param("ar1", Array, sep: " ") { every Integer }
+      results = target.validate({ "ar1" => %w(0 2 4 f 8) }) do
+        param("ar1", Array) { every Integer }
       end
 
       expect(results).to be_invalid
@@ -186,9 +234,9 @@ RSpec.describe Rack::Params do
     end
 
     it "can validate nested arrays" do
-      results = target.validate({ "ar1" => "0,1,2;3,4,5;6,t,8" }) do
-        param("ar1", Array, sep: ";") {
-          every Array, sep: "," do
+      results = target.validate({ "ar1" => [%w(0 1 2), %w(3 4 5), %w(6 t 8)] }) do
+        param("ar1", Array) {
+          every Array do
             every Integer
           end
         }
@@ -241,4 +289,48 @@ RSpec.describe Rack::Params do
       end
     end
   end
+
+  context "transform blocks" do
+    it "handles optional params by not calling the block" do
+      missing_flag = false
+      default_flag = false
+
+      results = target.validate({ "opt_here" => "optional" }) do
+        param("opt_here")                     { |v| v.upcase }
+        param("opt_missing")                  { |v| missing_flag = true; v.upcase }
+        param("opt_default", default: "blah") { |v| default_flag = true; v.upcase }
+      end
+
+      expect(results).to be_valid
+      expect(results).to match({ "opt_here" => "OPTIONAL", "opt_missing" => nil, "opt_default" => "BLAH" })
+      expect(missing_flag).to be(false)
+      expect(default_flag).to be(true)
+    end
+
+    it "can be a required field" do
+      missing_flag = false
+
+      results = target.validate({ "req_here" => "required" }) do
+        param("req_here",    required: true) { |v| v.upcase }
+        param("req_missing", required: true) { |v| missing_flag = true; v.upcase }
+      end
+
+      expect(results).to be_invalid
+      expect(results).to match({ "req_here" => "REQUIRED" })
+      expect(results.errors.keys).to include("req_missing")
+      expect(missing_flag).to be(false)
+    end
+  end
+
+  context "method transform" do
+    it "can take a type of :method, which calls the _sender_" do
+      pending "this might be useful"
+      results = target.validate({ "key" => "hello" }) do
+        param "key", method: :target_capitalize
+      end
+
+      expect(results["key"]).to eq("Hello")
+    end
+  end
+
 end

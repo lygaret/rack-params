@@ -12,7 +12,7 @@ RSpec.describe "readme examples" do
       "id"      => "3",
       "title"   => "some title",
       "created" => DateTime.now.to_s,
-      "tags"    => "x y z",
+      "tags"    => %w{x y z},
       "extra"   => "some val that we'll lose",
       "content" => {
         "body"   => "some body",

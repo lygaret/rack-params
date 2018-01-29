@@ -27,7 +27,7 @@ class SomeExampleApp
     param :title,   String,   required: true
     param :created, DateTime
     
-    param :tags, Array, sep: " " do
+    param :tags, Array do
       every Symbol
     end
     

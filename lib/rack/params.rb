@@ -56,12 +56,12 @@ module Rack
         name   = nil
       end
 
-      fail ArgumentError, "no parameters provided!" if params.nil?
+      fail "no parameters provided!" if params.nil?
       if name.nil?
-        fail ArgumentError, "no validation block was provided!" unless block_given?
+        fail "no validation block was provided!" unless block_given?
         HashContext.new(params, options).exec(&block)
       else
-        fail ArgumentError, "no validation is registered under #{name}" unless self.class.validators.key? name
+        fail "no validation is registered under #{name}" unless self.class.validators.key? name
         self.class.validators[name].exec(params)
       end
     end
