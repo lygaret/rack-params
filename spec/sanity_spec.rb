@@ -103,6 +103,15 @@ RSpec.describe Rack::Params do
 
       expect(results).to match({ "str" => "default value" })
     end
+
+    it "defaults to a string extraction" do
+      results = target.validate({ "foo" => "bar" }) do
+        param "foo", required: true
+      end
+
+      expect(results).to be_valid
+      expect(results["foo"]).to eq("bar")
+    end
   end
 
   context "number type coercion" do
@@ -171,6 +180,35 @@ RSpec.describe Rack::Params do
     end
   end
 
+  context "options" do
+    it "can allow nils with :allow_nil" do
+      results = target.validate({ "foo" => nil, "bar" => nil, "baz" => nil }) do
+        param "foo", String, allow_nil: true,  required: true
+        param "bar", String, allow_nil: false, required: true
+        param "baz", String, required: true # default is allow_nil = false
+      end
+
+      # foo isn't invalid
+      expect(results).to be_invalid
+      expect(results.errors.keys).to contain_exactly("bar", "baz")
+      expect(results.keys).to contain_exactly("foo")
+      expect(results["foo"]).to be_nil
+    end
+
+    it "can allow blank with :allow_blank" do
+      results = target.validate({ "foo" => "", "bar" => "", "baz" => "" }) do
+        param "foo", String, allow_blank: true,  required: true
+        param "bar", String, allow_blank: false, required: true
+        param "baz", String, required: true # default is allow_blank = false
+      end
+
+      expect(results).to be_invalid
+      expect(results.errors.keys).to contain_exactly("bar", "baz")
+      expect(results.keys).to contain_exactly("foo")
+      expect(results["foo"]).to eq("")
+    end
+  end
+
   context "param overloads" do
     it "can do simple type coercion (with and without) options" do
       results = target.validate({ "pi-ish" => "3.1415" }) do
@@ -181,20 +219,6 @@ RSpec.describe Rack::Params do
       expect(results).to be_valid
       expect(results["pi-ish"]).to eq(3.1415)
       expect(results["missing"]).to eq("defaulted")
-    end
-
-    it "fails when simple type coercion gets a block (with or without options)" do
-      expect do
-        target.validate({ "key" => "hello" }) do
-          param("key", String) { v.to_s.upcase }
-        end
-      end.to raise_error RuntimeError, /cannot recurse/
-
-      expect do
-        target.validate({ "key" => "hello" }) do
-          param("key", String, required: true) { v.to_s.upcase }
-        end
-      end.to raise_error RuntimeError, /cannot recurse/
     end
 
     it "can do block type coercion (with and without) options" do
@@ -213,9 +237,11 @@ RSpec.describe Rack::Params do
 
     it "can do hash and array coercion (short circuits out of 'simple type coercion')" do
       results = target.validate({ "string" => "hello", "hash" => { "key" => "value" }, "array" => %w(1 2 3) }) do
-        param("hash", Hash) { param "key", String }
+        param("hash",  Hash)  { param "key", String }
         param("array", Array) { every Integer }
-        param("string") { |v| "#{v[0].upcase}#{v[1..-1]}, #{v}!" }
+        param "string" do |v|
+          "#{v[0].upcase}#{v[1..-1]}, #{v}!"
+        end
       end
 
       expect(results).to be_valid
@@ -291,19 +317,19 @@ RSpec.describe Rack::Params do
   end
 
   context "transform blocks" do
-    it "handles optional params by not calling the block" do
+    it "handles optional params by not calling the block with nil" do
       missing_flag = false
       default_flag = false
 
       results = target.validate({ "opt_here" => "optional" }) do
         param("opt_here")                     { |v| v.upcase }
-        param("opt_missing")                  { |v| missing_flag = true; v.upcase }
+        param("opt_missing")                  { |v| missing_flag = true; v.inspect }
         param("opt_default", default: "blah") { |v| default_flag = true; v.upcase }
       end
 
       expect(results).to be_valid
-      expect(results).to match({ "opt_here" => "OPTIONAL", "opt_missing" => nil, "opt_default" => "BLAH" })
-      expect(missing_flag).to be(false)
+      expect(results).to match({ "opt_here" => "OPTIONAL", "opt_missing" => "nil", "opt_default" => "BLAH" })
+      expect(missing_flag).to be(true)
       expect(default_flag).to be(true)
     end
 
@@ -319,6 +345,19 @@ RSpec.describe Rack::Params do
       expect(results).to match({ "req_here" => "REQUIRED" })
       expect(results.errors.keys).to include("req_missing")
       expect(missing_flag).to be(false)
+    end
+
+    it "has access to other parameters" do
+      data = { "user" => "jon", "pass" => "password" }
+      results = target.validate(data) do
+        param "user", required: true
+        param "pass", required: true do |pass|
+          params["user"] == "jon" && pass == "password"
+        end
+      end
+
+      expect(results).to be_valid
+      expect(results["pass"]).to be true
     end
   end
 

@@ -28,7 +28,7 @@ class SomeExampleApp
     param :created, DateTime
     
     param :tags, Array do
-      every Symbol
+      every :symbol
     end
     
     param :content, Hash, required: true do
