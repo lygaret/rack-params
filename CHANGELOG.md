@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
+## [0.0.1.pre6](https://github.com/lygaret/rack-params/releases/tag/v0.0.1.pre6)
+
 This is a pretty major refactor, but since we're not really released
 at all yet, I'm just including highlights in the changelog - check the
 diff for explicit changes, but so much got moved around, I'm not sure
