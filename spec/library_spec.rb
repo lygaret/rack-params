@@ -1,28 +1,24 @@
 require 'rack'
 require 'rack/params'
-require 'byebug'
+
+# more or less an integration test suite
+# basic/advanced/interesting call patterns, etc.
+
+class Target
+  include Rack::Params
+
+  validator :demo do
+    param :num, Integer
+  end
+
+  def target_capitalize(v)
+    v[0].upcase + v[1..-1]
+  end
+end
 
 RSpec.describe Rack::Params do
 
-  it "has a version number" do
-    expect(Rack::Params::VERSION).not_to be nil
-  end
-
-  class Target
-    include Rack::Params
-
-    validator :demo do
-      param :num, Integer
-    end
-
-    def target_capitalize(v)
-      v[0].upcase + v[1..-1]
-    end
-  end
-
-  let (:target) do
-    Target.new
-  end
+  subject(:target) { Target.new }
 
   context ".validator" do
     it "can save a named validator, and run it later" do

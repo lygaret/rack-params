@@ -6,23 +6,21 @@ and this project adheres to [Semantic Versioning](http://semver.org/spec/v2.0.0.
 
 ## [Unreleased]
 
-### Added
-* started a Changelog
-* [Feature]! can pass a block to `HashContext#param` and `ArrayContext#every` when `type`
-  is `nil` to manually coerce the parameter
+This is a pretty major refactor, but since we're not really released
+at all yet, I'm just including highlights in the changelog - check the
+diff for explicit changes, but so much got moved around, I'm not sure
+that'll be easy. Such are the perogotives of personal projects :)
 
-### Changed
-* clarified that if a parameter is missing, it's not in the result _at all_,
-  rather than simply nil.
-* clarified what errors get raised on code-fail; `ArgumentError` is raised for
-  parameter failures, `RuntimeError` on bad call (missing block, block in the wrong place,
-  etc.)
-
-### Removed
-* Array and Hash parameters are now assumed to be already parsed, via
-  `Rack::QueryParser`, so the `sep:` options are gone.
-* `Context#_recurse`; it's inlined under `Context#_coerce` now, to handle more
-  complex block semantics
+* added a changelog!
+* `#param` and `#every` now take a block for any type, which is passed
+  the value for transformation (think #map), which makes the
+  Hash/Array handling less special (though still special, since
+  they're recursed, not transformed given the block).
+* extracted the `Validator` module from `Context`; easier to test,
+  makes more sense architecturally (context is only concerned with
+  being `self` for the block), and allows the use of the validation
+  helpers elsewhere.
+* much more robust specs.
 
 ### [0.0.1.pre5]
 - all basic functionality

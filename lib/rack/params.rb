@@ -10,8 +10,8 @@ require 'rack/params/version'
 module Rack
 
   # Rack::Params provides a lightweight DSL for type coercion and validation of request parameters.
-  # @!parse extend Rack::Params::ClassMethods
   module Params
+    # @!parse extend Rack::Params::ClassMethods
 
     # @private
     def self.included(base)
