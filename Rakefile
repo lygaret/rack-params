@@ -8,7 +8,7 @@ require "coveralls/rake/task"
 
 import(*Dir.glob("./lib/rack/params/**/*.rake"))
 
-CLOBBER << "docs"
+CLOBBER << "doc"
 CLOBBER << "coverage"
 
 RSpec::Core::RakeTask.new(:spec)

@@ -12,7 +12,10 @@ SimpleCov.formatter = SimpleCov::Formatter::MultiFormatter.new(
     Coveralls::SimpleCov::Formatter
   ]
 )
-SimpleCov.start
+
+SimpleCov.start do
+  add_filter "/spec/"
+end
 
 # drop the lib directory into the load path
 lib = File.expand_path("../../lib", __FILE__)

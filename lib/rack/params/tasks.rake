@@ -4,7 +4,7 @@ require 'yard/rake/yardoc_task'
 
 namespace :docs do
   ROOT_DIR = `git rev-parse --show-toplevel`.strip
-  DOC_DIR  = File.join(ROOT_DIR, 'docs')
+  DOC_DIR  = File.join(ROOT_DIR, 'doc')
 
   YARD::Rake::YardocTask.new(:generate) do |yard|
     yard.options = ["--out", DOC_DIR]

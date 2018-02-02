@@ -12,7 +12,7 @@ RSpec.describe "readme examples" do
       "id"      => "3",
       "title"   => "some title",
       "created" => DateTime.now.to_s,
-      "tags"    => "x y z",
+      "tags"    => %w{x y z},
       "extra"   => "some val that we'll lose",
       "content" => {
         "body"   => "some body",
@@ -25,8 +25,8 @@ RSpec.describe "readme examples" do
       param :title,   String,   required: true
       param :created, DateTime
     
-      param :tags, Array, sep: " " do
-        every Symbol
+      param :tags, Array do
+        every :symbol
       end
     
       param :content, Hash, required: true do

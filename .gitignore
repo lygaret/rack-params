@@ -3,6 +3,7 @@
 /_yardoc/
 /coverage/
 /docs/
+/doc/
 /pkg/
 /spec/reports/
 /tmp/
@@ -12,3 +13,4 @@
 spec/examples.txt
 /.byebug_history
 /Gemfile.lock
+/CHANGELOG.html
