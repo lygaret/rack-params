@@ -24,8 +24,8 @@ module Rack
       #   @yield a code block that will run in the context of a {Rack::Params::HashContext} to validate the params
       #   @return [Result] a result hash containing the extracted keys, and any errors.
       #   @raise [ParameterValidationError] if the parameters are invalid after validation and coercion 
-      def validate(name = nil, params = nil, options = {}, &block)
-        super(name, params || request.params, options, &block)
+      def validate(name = nil, params = nil, **options, &block)
+        super(name, params || request.params, **options, &block)
       end
 
       # validates {Rack::Request#params} against a validator, raising on errors.
@@ -40,8 +40,8 @@ module Rack
       #   @yield a code block that will run in the context of a {Rack::Params::HashContext} to validate the params
       #   @return [Result] a valid result hash containing the extracted keys, and no errors.
       #   @raise [ParameterValidationError] if the parameters are invalid after validation and coercion 
-      def validate!(name = nil, params = nil, options = {}, &block)
-        super(name, params || request.params, options, &block)
+      def validate!(name = nil, params = nil, **options, &block)
+        super(name, params || request.params, **options, &block)
       end
     end
     

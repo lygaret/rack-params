@@ -20,7 +20,7 @@ module Rack
         #   is blank considered present? for :required?,
         #   defaults to false, considered missing.
         # @see #_blank?
-        def _fetch(key, options)
+        def _fetch(key, options = {})
           value = params.key?(key) ? params[key] : options[:default]
           options[:required] ? _ensure(value, options) : value
         end
@@ -75,7 +75,7 @@ module Rack
         # @param key the result key under which to place the collected parameters
         # @param options [Hash]
         # @return the collected keys as a hash
-        def splat(key, options = {})
+        def splat(key, **options)
           key = key.to_s
 
           # every key in params that's not already in results

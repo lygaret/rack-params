@@ -17,7 +17,7 @@ module Rack
       # the actual {#result} will be this type extended by {Rack::Params::Result}
       Result = nil
 
-      def self.exec(params, **options, &block)
+      def self.exec(params, options = {}, &block)
         HashContext.new(params, options).exec(&block)
       end
 
@@ -56,10 +56,10 @@ module Rack
       #   inside a suitable validation context; also merges result errors.
       #   @param [Hash] options, same as {#initialize}
       #   @return [Array] tuple of validated results
-      def _yield(key, value, type, **options, &block)
+      def _yield(key, value, type, options = {}, &block)
         # simple types
         unless type == ::Array || type == ::Hash
-          return super(value, **options, &block) 
+          return super(value, options, &block) 
         end
 
         # recursive types

@@ -90,7 +90,7 @@ module Rack
       # @option options :allow_blank [Boolean] if :required, allow blank
       # @return value after transformation
       # @see _ensure
-      def _yield(value, **options, &block)
+      def _yield(value, options = {}, &block)
         fail "no block provided" if block.nil?
 
         value = block.call(value)

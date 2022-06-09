@@ -21,7 +21,7 @@ module Rack
     module ClassMethods
       # @private
       Validator = Struct.new(:options, :code) do
-        def exec(values, **options)
+        def exec(values)
           Rack::Params::Context.exec(values, options, &code)
         end
       end
@@ -33,7 +33,7 @@ module Rack
 
       # register a Validator with the given options and block.
       # the validator can be used in #validate method by providing the name.
-      def validator(name, options = {}, &code)
+      def validator(name, **options, &code)
         validators[name] = Validator.new(options, code)
       end
     end
@@ -52,7 +52,7 @@ module Rack
     #   @param [Hash] options
     #   @yield a code block that will run in the context of a {Rack::Params::HashContext} to validate the params
     #   @return [Result] a result hash containing the extracted keys, and errors.
-    def validate(name = nil, params = nil, options = {}, &block)
+    def validate(name = nil, params = nil, **options, &block)
       if params.nil? && (name.class <= Hash)
         params = name
         name   = nil
@@ -61,7 +61,7 @@ module Rack
       fail "no parameters provided!" if params.nil?
       if name.nil?
         fail "no validation block was provided!" unless block_given?
-        Rack::Params::Context.exec(params, **options, &block)
+        Rack::Params::Context.exec(params, options, &block)
       else
         fail "no validation is registered under #{name}" unless self.class.validators.key? name
         self.class.validators[name].exec(params)
@@ -82,8 +82,8 @@ module Rack
     #   @yield a code block that will run in the context of a {Rack::Params::HashContext} to validate the params
     #   @return [Result] a valid result hash containing the extracted keys, and no errors.
     #   @raise [ParameterValidationError] if the parameters are invalid after validation and coercion 
-    def validate!(name = nil, params = nil, options = {}, &block)
-      validate(name, params, options, &block).tap do |res|
+    def validate!(name = nil, params = nil, **options, &block)
+      validate(name, params, **options, &block).tap do |res|
         fail ParameterValidationError, res.errors if res.invalid?
       end
     end

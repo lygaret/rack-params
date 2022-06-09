@@ -1,6 +1,5 @@
 require "bundler/setup"
 
-require "byebug"
 require "simplecov"
 require "simplecov-console"
 require "coveralls"
